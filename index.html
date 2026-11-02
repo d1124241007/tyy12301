@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>林毅峰SDGs不塑永續-淨灘</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            user-select: none;
+            overflow: hidden;
+        }
+
+        /* 動態海浪動畫 */
+        @keyframes waveMove {
+            0% { transform: translateX(0) scaleY(1); }
+            50% { transform: translateX(-25px) scaleY(1.05); }
+            100% { transform: translateX(0) scaleY(1); }
+        }
+
+        /* 海上開車動畫 */
+        @keyframes driveCar {
+            0% { transform: translateX(-150px) scaleX(1); }
+            48% { transform: translateX(calc(100vw + 50px)) scaleX(1); }
+            50% { transform: translateX(calc(100vw + 50px)) scaleX(-1); }
+            98% { transform: translateX(-150px) scaleX(-1); }
+            100% { transform: translateX(-150px) scaleX(1); }
+        }
+
+        .ocean-car {
+            animation: driveCar 16s linear infinite;
+        }
+
+        @keyframes carBob {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-4px) rotate(2deg); }
+        }
+
+        .car-bounce {
+            animation: carBob 1.2s ease-in-out infinite;
+        }
+
+        .animate-wave-1 {
+            animation: waveMove 6s ease-in-out infinite;
+        }
+        .animate-wave-2 {
+            animation: waveMove 4s ease-in-out infinite reverse;
+        }
+
+        /* ---------------- 火柴人動作與混戰動畫 ---------------- */
+        @keyframes stickPunch {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-15deg); }
+            50% { transform: rotate(20deg); }
+        }
+        @keyframes stickArmPunch {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(-70deg) translateX(-4px); }
+        }
+        @keyframes stickKick {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(45deg); }
+        }
+        @keyframes stickSwordSwing {
+            0%, 100% { transform: rotate(-30deg); }
+            50% { transform: rotate(60deg); }
+        }
+        @keyframes stickRun {
+            0% { transform: translateX(0) scaleX(1); }
+            45% { transform: translateX(120px) scaleX(1); }
+            50% { transform: translateX(120px) scaleX(-1); }
+            95% { transform: translateX(0) scaleX(-1); }
+            100% { transform: translateX(0) scaleX(1); }
+        }
+
+        .anim-stick-punch { animation: stickPunch 0.6s infinite ease-in-out; }
+        .anim-arm-punch { animation: stickArmPunch 0.4s infinite ease-in-out; }
+        .anim-leg-kick { animation: stickKick 0.5s infinite ease-in-out; }
+        .anim-sword { animation: stickSwordSwing 0.4s infinite ease-in-out; }
+        .anim-stick-run { animation: stickRun 4s infinite linear; }
+
+        /* 拾取垃圾浮空消失動畫 */
+        @keyframes collectAnim {
+            0% {
+                transform: scale(1) translateY(0) rotate(0deg);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.4) translateY(-30px) rotate(180deg);
+                opacity: 0.8;
+            }
+            100% {
+                transform: scale(0) translateY(-60px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .collecting {
+            animation: collectAnim 0.4s forwards ease-out;
+            pointer-events: none;
+        }
+
+        /* 飄浮分數提示動畫 */
+        @keyframes floatText {
+            0% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-40px); }
+        }
+        .score-float {
+            position: absolute;
+            animation: floatText 0.8s forwards ease-out;
+            font-weight: 900;
+            color: #fbbf24;
+            text-shadow: 2px 2px 0px #000;
+            pointer-events: none;
+            z-index: 50;
+        }
+
+        /* 垃圾 Hover 效果 */
+        .trash-item {
+            transition: transform 0.15s ease, filter 0.15s ease;
+            cursor: pointer;
+        }
+        .trash-item:hover {
+            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.9)) brightness(1.15);
+        }
+    </style>
+</head>
+<body class="w-screen h-screen relative bg-amber-100 flex flex-col justify-between">
+
+    <!-- 頁首與資訊列 -->
+    <header class="absolute top-0 left-0 right-0 z-30 p-4 md:p-6 flex justify-between items-start pointer-events-none">
+        <!-- 頁首標題（左上角大粗體） -->
+        <div class="pointer-events-auto bg-white/80 backdrop-blur-md px-5 py-3 rounded-2xl shadow-lg border border-white/50">
+            <h1 class="text-2xl md:text-3xl font-black text-emerald-800 tracking-wide flex items-center gap-2">
+                <i class="fa-solid fa-leaf text-emerald-500"></i>
+                林毅峰SDGs不塑永續-淨灘
+            </h1>
+            <p class="text-xs md:text-sm text-emerald-600 font-bold mt-1">守護海洋環境 ‧ 點擊清理沙灘垃圾</p>
+        </div>
+
+        <!-- 遊戲數據顯示（右上角） -->
+        <div class="pointer-events-auto flex gap-3">
+            <div class="bg-white/80 backdrop-blur-md px-4 py-2 rounded-2xl shadow-lg border border-white/50 text-center">
+                <div class="text-xs text-gray-500 font-bold">關卡 LEVEL</div>
+                <div id="level-display" class="text-xl md:text-2xl font-black text-indigo-600">1</div>
+            </div>
+            <div class="bg-white/80 backdrop-blur-md px-4 py-2 rounded-2xl shadow-lg border border-white/50 text-center">
+                <div class="text-xs text-gray-500 font-bold">已清理垃圾</div>
+                <div class="text-xl md:text-2xl font-black text-teal-600">
+                    <span id="cleaned-count">0</span> / <span id="total-count">50</span>
+                </div>
+            </div>
+            <div class="bg-white/80 backdrop-blur-md px-5 py-2 rounded-2xl shadow-lg border border-white/50 text-center min-w-[100px]">
+                <div class="text-xs text-gray-500 font-bold">累積積分</div>
+                <div id="score-display" class="text-xl md:text-2xl font-black text-amber-500">0</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 背景場景：天空 + 海洋 -->
+    <div class="relative w-full h-1/2 bg-gradient-to-b from-sky-300 via-sky-200 to-teal-400 overflow-hidden">
+        <!-- 太陽與雲朵裝飾 -->
+        <div class="absolute top-8 left-1/2 transform -translate-x-1/2 w-24 h-24 bg-yellow-300 rounded-full blur-sm opacity-80"></div>
+        <i class="fa-solid fa-cloud text-white/60 text-6xl absolute top-12 left-10"></i>
+        <i class="fa-solid fa-cloud text-white/50 text-5xl absolute top-6 right-20"></i>
+
+        <!-- 海上巡邏車與人物動畫 -->
+        <div class="ocean-car absolute bottom-10 left-0 z-20 pointer-events-none">
+            <div class="car-bounce relative w-32 h-20">
+                <!-- 浪花噴濺效果 -->
+                <div class="absolute bottom-1 left-2 w-8 h-3 bg-white/70 rounded-full blur-xs animate-ping"></div>
+                <div class="absolute bottom-1 right-2 w-8 h-3 bg-white/70 rounded-full blur-xs animate-ping"></div>
+                
+                <!-- 車體 SVG (水陸兩用沙灘車 / 海上巡邏車 + 駕駛人物) -->
+                <svg viewBox="0 0 120 70" class="w-full h-full drop-shadow-md">
+                    <!-- 輪胎浮筒與車身下半部 -->
+                    <rect x="15" y="45" width="22" height="18" rx="8" fill="#1e293b"/>
+                    <rect x="75" y="45" width="22" height="18" rx="8" fill="#1e293b"/>
+                    <!-- 車身 -->
+                    <path d="M10 42 L25 24 L80 24 L105 38 L110 48 L10 48 Z" fill="#ef4444"/>
+                    <path d="M25 24 L45 8 L75 8 L88 24 Z" fill="#0284c7" opacity="0.8"/> <!-- 車窗 -->
+                    
+                    <!-- 駕駛人物 -->
+                    <circle cx="50" cy="16" r="6" fill="#fde047"/> <!-- 帽子/頭套 -->
+                    <circle cx="50" cy="18" r="4.5" fill="#fca5a5"/> <!-- 臉 -->
+                    <rect x="44" y="22" width="12" height="10" rx="3" fill="#059669"/> <!-- 衣服 -->
+                    <!-- 駕駛方向盤 -->
+                    <rect x="62" y="19" width="3" height="8" transform="rotate(20 62 19)" fill="#334155"/>
+
+                    <!-- 車燈與警示燈 -->
+                    <circle cx="106" cy="40" r="3" fill="#fef08a"/>
+                    <polygon points="108,37 120,32 120,48 108,43" fill="#fef08a" opacity="0.4"/>
+                    <rect x="52" y="5" width="6" height="4" fill="#3b82f6" class="animate-pulse"/> <!-- 藍色警示燈 -->
+                </svg>
+            </div>
+        </div>
+
+        <!-- 海浪效果 -->
+        <div class="absolute bottom-0 w-full h-24 overflow-hidden">
+            <svg class="absolute bottom-0 w-[120%] h-full text-teal-500/50 animate-wave-1" viewBox="0 0 1200 120" preserveAspectRatio="none">
+                <path d="M0,0 C150,90 350,-40 500,40 C650,120 900,20 1200,60 L1200,120 L0,120 Z" fill="currentColor"></path>
+            </svg>
+            <svg class="absolute bottom-0 w-[120%] h-full text-cyan-600/60 animate-wave-2" viewBox="0 0 1200 120" preserveAspectRatio="none">
+                <path d="M0,30 C200,100 450,10 700,70 C950,130 1100,20 1200,40 L1200,120 L0,120 Z" fill="currentColor"></path>
+            </svg>
+        </div>
+    </div>
+
+    <!-- 沙灘區域 (垃圾生成區域：網頁下半部) -->
+    <div id="beach-zone" class="relative w-full h-1/2 bg-gradient-to-b from-amber-200 via-amber-300 to-amber-400 shadow-inner overflow-hidden">
+        <!-- 沙灘紋理與骨頭裝飾 -->
+        <div class="absolute inset-0 opacity-20 bg-[radial-gradient(#d97706_1px,transparent_1px)] [background-size:16px_16px]"></div>
+        <!-- 沙灘上的固定飾物：各式骨頭與貝殼 -->
+        <div class="absolute top-4 left-10 text-amber-800/40 text-2xl transform -rotate-12 pointer-events-none"><i class="fa-solid fa-bone"></i></div>
+        <div class="absolute top-12 right-24 text-amber-800/30 text-3xl transform rotate-45 pointer-events-none"><i class="fa-solid fa-fish-bone"></i></div>
+        <div class="absolute bottom-6 left-1/3 text-amber-800/35 text-2xl transform rotate-180 pointer-events-none"><i class="fa-solid fa-bone"></i></div>
+        <div class="absolute bottom-16 right-12 text-amber-800/40 text-4xl transform -rotate-45 pointer-events-none"><i class="fa-solid fa-skull-crossbones"></i></div>
+        <div class="absolute top-24 left-1/4 text-amber-600/40 text-xl pointer-events-none"><i class="fa-solid fa-shell"></i></div>
+
+        <!-- ---------------- 沙灘火柴人混戰裝飾 (背景動畫) ---------------- -->
+        <!-- 戰鬥組 1：左側對打火柴人 -->
+        <div class="absolute top-8 left-1/6 pointer-events-none flex items-end gap-1 opacity-80 scale-90">
+            <!-- 拳擊火柴人 A -->
+            <svg class="w-12 h-16 anim-stick-punch" viewBox="0 0 50 70">
+                <circle cx="25" cy="12" r="8" stroke="#1e293b" stroke-width="4" fill="none"/>
+                <line x1="25" y1="20" x2="25" y2="45" stroke="#1e293b" stroke-width="4"/>
+                <line x1="25" y1="25" x2="40" y2="30" stroke="#ef4444" stroke-width="4" class="anim-arm-punch"/> <!-- 出拳 -->
+                <line x1="25" y1="25" x2="10" y2="35" stroke="#1e293b" stroke-width="4"/>
+                <line x1="25" y1="45" x2="12" y2="65" stroke="#1e293b" stroke-width="4"/>
+                <line x1="25" y1="45" x2="35" y2="65" stroke="#1e293b" stroke-width="4"/>
+            </svg>
+            <span class="text-xs font-black text-red-600 animate-ping -mt-8">POW!</span>
+            <!-- 踢腿火柴人 B -->
+            <svg class="w-12 h-16" viewBox="0 0 50 70">
+                <circle cx="25" cy="12" r="8" stroke="#1e293b" stroke-width="4" fill="none"/>
+                <line x1="25" y1="20" x2="25" y2="45" stroke="#1e293b" stroke-width="4"/>
+                <line x1="25" y1="25" x2="10" y2="35" stroke="#1e293b" stroke-width="4"/>
+                <line x1="25" y1="25" x2="38" y2="32" stroke="#1e293b" stroke-width="4"/>
+                <line x1="25" y1="45" x2="15" y2="65" stroke="#1e293b" stroke-width="4"/>
+                <line x1="25" y1="45" x2="45" y2="35" stroke="#3b82f6" stroke-width="4" class="anim-leg-kick"/> <!-- 飛踢 -->
+            </svg>
+        </div>
+
+        <!-- 戰鬥組 2：右側劍鬥火柴人 -->
+        <div class="absolute bottom-10 right-1/4 pointer-events-none flex items-end gap-2 opacity-80">
+            <!-- 持光劍火柴人 C -->
+            <svg class="w-14 h-18" viewBox="0 0 60 70">
+                <circle cx="20" cy="12" r="8" stroke="#1e293b" stroke-width="4" fill="none"/>
+                <line x1="20" y1="20" x2="20" y2="45" stroke="#1e293b" stroke-width="4"/>
+                <!-- 揮劍手臂與武器 -->
+                <g class="anim-sword" style="transform-origin: 20px 25px;">
+                    <line x1="20" y1="25" x2="45" y2="15" stroke="#1e293b" stroke-width="4"/>
+                    <line x1="45" y1="15" x2="58" y2="2" stroke="#10b981" stroke-width="5" stroke-linecap="round"/> <!-- 綠色劍身 -->
+                </g>
+                <line x1="20" y1="25" x2="5" y2="35" stroke="#1e293b" stroke-width="4"/>
+                <line x1="20" y1="45" x2="8" y2="65" stroke="#1e293b" stroke-width="4"/>
+                <line x1="20" y1="45" x2="32" y2="65" stroke="#1e293b" stroke-width="4"/>
+            </svg>
+            <!-- 拿棒棍火柴人 D -->
+            <svg class="w-14 h-18" viewBox="0 0 60 70">
+                <circle cx="35" cy="12" r="8" stroke="#1e293b" stroke-width="4" fill="none"/>
+                <line x1="35" y1="20" x2="35" y2="45" stroke="#1e293b" stroke-width="4"/>
+                <line x1="35" y1="25" x2="10" y2="15" stroke="#f59e0b" stroke-width="5" stroke-linecap="round" class="anim-sword" style="transform-origin: 35px 25px;"/>
+                <line x1="35" y1="25" x2="48" y2="35" stroke="#1e293b" stroke-width="4"/>
+                <line x1="35" y1="45" x2="22" y2="65" stroke="#1e293b" stroke-width="4"/>
+                <line x1="35" y1="45" x2="45" y2="65" stroke="#1e293b" stroke-width="4"/>
+            </svg>
+        </div>
+
+        <!-- 戰鬥組 3：中央沙灘追逐奔跑火柴人 -->
+        <div class="anim-stick-run absolute top-1/3 left-1/3 pointer-events-none opacity-75">
+            <svg class="w-10 h-14" viewBox="0 0 40 60">
+                <circle cx="20" cy="10" r="7" stroke="#1e293b" stroke-width="3.5" fill="none"/>
+                <line x1="20" y1="17" x2="20" y2="38" stroke="#1e293b" stroke-width="3.5"/>
+                <line x1="20" y1="22" x2="5" y2="32" stroke="#1e293b" stroke-width="3.5"/>
+                <line x1="20" y1="22" x2="35" y2="15" stroke="#1e293b" stroke-width="3.5"/>
+                <line x1="20" y1="38" x2="8" y2="56" stroke="#1e293b" stroke-width="3.5"/>
+                <line x1="20" y1="38" x2="32" y2="52" stroke="#1e293b" stroke-width="3.5"/>
+            </svg>
+        </div>
+
+        <!-- 垃圾與隨機骨頭將在此處 dynamically 產生 -->
+    </div>
+
+    <!-- 任務成功彈出視窗 Modal -->
+    <div id="success-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl text-center transform transition-all border-4 border-amber-300 relative overflow-hidden">
+            <!-- 裝飾彩帶背景效果 -->
+            <div class="absolute -top-12 -left-12 w-32 h-32 bg-yellow-300 rounded-full blur-2xl opacity-50"></div>
+            <div class="absolute -bottom-12 -right-12 w-32 h-32 bg-emerald-300 rounded-full blur-2xl opacity-50"></div>
+
+            <div class="relative z-10">
+                <div class="w-20 h-20 bg-amber-100 text-amber-500 rounded-full flex items-center justify-center mx-auto mb-4 text-4xl shadow-inner border-2 border-amber-300">
+                    <i class="fa-solid fa-trophy animate-bounce"></i>
+                </div>
+                <h2 class="text-3xl font-black text-gray-800 mb-2">任務成功！</h2>
+                <p class="text-emerald-600 font-bold text-sm mb-6">感謝您為海洋永續環境付出的努力！</p>
+
+                <!-- 數據統計框 -->
+                <div class="bg-amber-50 rounded-2xl p-4 mb-6 border border-amber-200 space-y-2">
+                    <div class="flex justify-between items-center text-sm">
+                        <span class="text-gray-600 font-bold">本關清除垃圾：</span>
+                        <span class="text-gray-800 font-black">50 個</span>
+                    </div>
+                    <div class="flex justify-between items-center text-sm">
+                        <span class="text-gray-600 font-bold">本關獲得積分：</span>
+                        <span id="modal-stage-score" class="text-amber-600 font-black text-base">+0</span>
+                    </div>
+                    <hr class="border-amber-200">
+                    <div class="flex justify-between items-center text-base">
+                        <span class="text-gray-700 font-bold">總累積積分：</span>
+                        <span id="modal-total-score" class="text-emerald-700 font-black text-xl">0</span>
+                    </div>
+                </div>
+
+                <!-- 按鈕 -->
+                <button id="next-level-btn" onclick="nextLevel()" class="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-black py-4 px-6 rounded-2xl shadow-lg transform active:scale-95 transition flex items-center justify-center gap-2 text-lg">
+                    <span>前往下一關</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 遊戲核心邏輯腳本 -->
+    <script>
+        // 垃圾與骨頭數據設定檔
+        const TRASH_TYPES = [
+            {
+                name: '保特瓶',
+                size: 'small',
+                points: 10,
+                width: 36,
+                height: 36,
+                badge: '小 (10分)',
+                svg: `<svg viewBox="0 0 24 24" class="w-full h-full drop-shadow"><path fill="#38bdf8" d="M10 2h4v2h-4z"/><path fill="#7dd3fc" d="M8 7s0-2 4-2 4 2 4 2v14s0 2-4 2-4-2-4-2V7z"/><path fill="#ffffff" opacity="0.5" d="M10 8h4v6h-4z"/></svg>`
+            },
+            {
+                name: '飲料杯',
+                size: 'small',
+                points: 10,
+                width: 38,
+                height: 38,
+                badge: '小 (10分)',
+                svg: `<svg viewBox="0 0 24 24" class="w-full h-full drop-shadow"><path fill="#f43f5e" d="M4 3h16v2H4z"/><path fill="#fda4af" d="M6 6l1.5 15h9L18 6H6z"/><path fill="#ffffff" opacity="0.6" d="M9 10h6v6H9z"/><path fill="#e11d48" d="M13 1v4h-2V1z"/></svg>`
+            },
+            {
+                name: '魚骨殘渣',
+                size: 'small',
+                points: 15,
+                width: 36,
+                height: 36,
+                badge: '小 (15分)',
+                svg: `<svg viewBox="0 0 24 24" class="w-full h-full drop-shadow"><path fill="#e2e8f0" d="M12 4l3 3h-2v3h4l2-2v6l-2-2h-4v3h2l-3 3-3-3h2v-3H7l-2 2V8l2 2h4V7H9l3-3z"/><path fill="#94a3b8" d="M12 2a2 2 0 100 4 2 2 0 000-4z"/></svg>`
+            },
+            {
+                name: '紙類餐盒',
+                size: 'medium',
+                points: 20,
+                width: 48,
+                height: 48,
+                badge: '中 (20分)',
+                svg: `<svg viewBox="0 0 24 24" class="w-full h-full drop-shadow"><path fill="#fde047" d="M3 8l9-4 9 4-9 4-9-4z"/><path fill="#eab308" d="M3 8l9 4v10l-9-4V8z"/><path fill="#ca8a04" d="M12 12l9-4v10l-9 4V12z"/></svg>`
+            },
+            {
+                name: '塑膠袋',
+                size: 'medium',
+                points: 20,
+                width: 46,
+                height: 46,
+                badge: '中 (20分)',
+                svg: `<svg viewBox="0 0 24 24" class="w-full h-full drop-shadow"><path fill="#cbd5e1" opacity="0.8" d="M6 7c0-2.2 1.8-4 4-4h4c2.2 0 4 1.8 4 4v2h2l-2 12H6L4 9h2V7zm4-2c-1.1 0-2 .9-2 2v2h8V7c0-1.1-.9-2-2-2h-4z"/></svg>`
+            },
+            {
+                name: '動物大骨頭',
+                size: 'medium',
+                points: 25,
+                width: 48,
+                height: 48,
+                badge: '中 (25分)',
+                svg: `<svg viewBox="0 0 24 24" class="w-full h-full drop-shadow"><path fill="#f1f5f9" d="M17.5 4a2.5 2.5 0 00-2.3 3.5l-6.4 6.4a2.5 2.5 0 10-3.5 3.5 2.5 2.5 0 003.5-3.5l6.4-6.4A2.5 2.5 0 1017.5 4z"/></svg>`
+            },
+            {
+                name: '保麗龍',
+                size: 'large',
+                points: 35,
+                width: 60,
+                height: 60,
+                badge: '大 (35分)',
+                svg: `<svg viewBox="0 0 24 24" class="w-full h-full drop-shadow"><rect x="3" y="5" width="18" height="14" rx="3" fill="#f8fafc"/><path fill="#e2e8f0" d="M3 9h18v2H3zM3 14h18v2H3z"/><circle cx="7" cy="7" r="1" fill="#cbd5e1"/><circle cx="12" cy="16" r="1" fill="#cbd5e1"/></svg>`
+            },
+            {
+                name: '漂流垃圾',
+                size: 'large',
+                points: 35,
+                width: 64,
+                height: 64,
+                badge: '大 (35分)',
+                svg: `<svg viewBox="0 0 24 24" class="w-full h-full drop-shadow"><path fill="#78350f" d="M2 11c3-2 6 1 9-1s5 0 8 2l-2 4c-3-1-4 0-7 1s-5-3-8-1l-0-5z"/><path fill="#92400e" d="M4 14c2-1 4 1 6 0s4 0 6 1"/></svg>`
+            }
+        ];
+
+        // 遊戲狀態變數
+        const TOTAL_TRASH = 50;
+        let currentLevel = 1;
+        let cleanedCount = 0;
+        let totalScore = 0;
+        let stageScore = 0;
+
+        // 音效生成器 (使用 Web Audio API)
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new AudioContext();
+            }
+        }
+
+        // 播放撿垃圾音效
+        function playCollectSound() {
+            if (!audioCtx) initAudio();
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.1);
+            
+            gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+            
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.1);
+        }
+
+        // 播放關卡完成音效
+        function playWinSound() {
+            if (!audioCtx) initAudio();
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            const notes = [523.25, 659.25, 783.99, 1046.50];
+            notes.forEach((freq, index) => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime + index * 0.12);
+                
+                gain.gain.setValueAtTime(0.3, audioCtx.currentTime + index * 0.12);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + index * 0.12 + 0.25);
+                
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                
+                osc.start(audioCtx.currentTime + index * 0.12);
+                osc.stop(audioCtx.currentTime + index * 0.12 + 0.25);
+            });
+        }
+
+        // 初始化/生成垃圾
+        function spawnTrash() {
+            const beachZone = document.getElementById('beach-zone');
+            beachZone.innerHTML = `
+                <div class="absolute inset-0 opacity-20 bg-[radial-gradient(#d97706_1px,transparent_1px)] [background-size:16px_16px]"></div>
+                <div class="absolute top-4 left-10 text-amber-800/40 text-2xl transform -rotate-12"><i class="fa-solid fa-bone"></i></div>
+                <div class="absolute top-12 right-24 text-amber-800/30 text-3xl transform rotate-45"><i class="fa-solid fa-fish-bone"></i></div>
+                <div class="absolute bottom-6 left-1/3 text-amber-800/35 text-2xl transform rotate-180"><i class="fa-solid fa-bone"></i></div>
+                <div class="absolute bottom-16 right-12 text-amber-800/40 text-4xl transform -rotate-45"><i class="fa-solid fa-skull-crossbones"></i></div>
+                <div class="absolute top-24 left-1/4 text-amber-600/40 text-xl"><i class="fa-solid fa-shell"></i></div>
+            `;
+
+            cleanedCount = 0;
+            stageScore = 0;
+            updateUI();
+
+            const zoneWidth = beachZone.clientWidth;
+            const zoneHeight = beachZone.clientHeight;
+
+            for (let i = 0; i < TOTAL_TRASH; i++) {
+                const type = TRASH_TYPES[Math.floor(Math.random() * TRASH_TYPES.length)];
+                
+                const item = document.createElement('div');
+                item.className = 'trash-item absolute flex items-center justify-center select-none';
+                item.style.width = `${type.width}px`;
+                item.style.height = `${type.height}px`;
+
+                const rotation = Math.floor(Math.random() * 360);
+                
+                const padding = 20;
+                const randomX = padding + Math.random() * (zoneWidth - type.width - padding * 2);
+                const randomY = padding + Math.random() * (zoneHeight - type.height - padding * 2);
+
+                item.style.left = `${randomX}px`;
+                item.style.top = `${randomY}px`;
+                item.style.transform = `rotate(${rotation}deg)`;
+
+                item.innerHTML = type.svg;
+                item.title = `${type.name} - ${type.badge}`;
+
+                item.onclick = (e) => collectTrash(e, item, type);
+
+                beachZone.appendChild(item);
+            }
+        }
+
+        // 點擊垃圾處理邏輯
+        function collectTrash(event, element, type) {
+            if (element.classList.contains('collecting')) return;
+
+            playCollectSound();
+
+            cleanedCount++;
+            stageScore += type.points;
+            totalScore += type.points;
+
+            showFloatingScore(event.clientX, event.clientY, `+${type.points}`);
+
+            element.classList.add('collecting');
+            setTimeout(() => {
+                element.remove();
+            }, 380);
+
+            updateUI();
+
+            if (cleanedCount >= TOTAL_TRASH) {
+                setTimeout(showWinModal, 600);
+            }
+        }
+
+        // 顯示飄浮分數動畫
+        function showFloatingScore(x, y, text) {
+            const floatEl = document.createElement('div');
+            floatEl.className = 'score-float text-xl md:text-2xl';
+            floatEl.innerText = text;
+            floatEl.style.left = `${x - 15}px`;
+            floatEl.style.top = `${y - 30}px`;
+            document.body.appendChild(floatEl);
+
+            setTimeout(() => {
+                floatEl.remove();
+            }, 800);
+        }
+
+        // 更新數據 UI
+        function updateUI() {
+            document.getElementById('cleaned-count').innerText = cleanedCount;
+            document.getElementById('total-count').innerText = TOTAL_TRASH;
+            document.getElementById('score-display').innerText = totalScore;
+            document.getElementById('level-display').innerText = currentLevel;
+        }
+
+        // 顯示任務成功 Modal
+        function showWinModal() {
+            playWinSound();
+            document.getElementById('modal-stage-score').innerText = `+${stageScore}`;
+            document.getElementById('modal-total-score').innerText = totalScore;
+            document.getElementById('success-modal').classList.remove('hidden');
+        }
+
+        // 前往下一關
+        function nextLevel() {
+            currentLevel++;
+            document.getElementById('success-modal').classList.add('hidden');
+            spawnTrash();
+        }
+
+        // 網頁載入後初始化遊戲
+        window.onload = () => {
+            spawnTrash();
+        };
+    </script>
+</body>
+</html>
